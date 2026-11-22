@@ -3,7 +3,7 @@
 // 多間分校共用同一個網址：改填 branches，每間分校一行（id 用英文小寫，網址可加 ?b=id 直接進該分校）。
 //   各分校的資料都在自己的雲端硬碟，這裡只記錄「去哪裡找」。
 window.YL_CLOUD = {
-  api: '',
+  api: 'https://script.google.com/macros/s/AKfycbxbOdmbkeZ90OxBO6332amtXw16-o0w7-Lv0ld60M9GsHxbfO0vyOCr8cSw6bBKcXWf/exec',
   branches: [
     // { id: 'ytu', name: '雲科大分校', api: 'https://script.google.com/macros/s/……/exec' },
   ],
