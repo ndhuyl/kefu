@@ -15725,7 +15725,11 @@ ${lines.join("\n")}`;
       return `<label class="field"><span>SEL 活動</span><select class="select" data-x="content"><option value="">請選擇 SEL 活動</option>${selGroups().map(([part, list3]) => part ? `<optgroup label="${esc(part)}">${opts2(list3)}</optgroup>` : opts2(list3)).join("")}${t.content && !known ? `<option selected>${esc(t.content)}</option>` : ""}</select></label>
       <div class="small muted">${hint}</div>`;
     }
-    return `<label class="field"><span>活動內容</span><input class="input" data-x="content" value="${esc(t.content)}" list="task-other" placeholder="選擇或輸入，例如：班級活動"></label>
+    const acts = otherActs(), curO = t.content || "", selfO = !!curO && !acts.includes(curO);
+    if (!acts.length) return `<label class="field"><span>活動內容</span><input class="input" data-x="content" value="${esc(t.content)}" placeholder="例如：班級活動"></label>
+    <label class="field"><span>說明</span><textarea class="textarea" data-x="detail" rows="3" placeholder="這個任務要做什麼、需要注意的地方">${esc(t.detail)}</textarea></label>`;
+    return `<label class="field"><span>活動內容</span><select class="select" data-x="opick"><option value="">請選擇活動</option>${acts.map((x) => `<option ${!selfO && x === curO ? "selected" : ""}>${esc(x)}</option>`).join("")}<option value="__self__" ${selfO ? "selected" : ""}>自行輸入</option></select></label>
+    <label class="field" data-x="owrap" ${selfO ? "" : "hidden"}><span>自行輸入活動內容</span><input class="input" data-x="oinput" value="${esc(selfO ? curO : "")}" placeholder="例：摺紙"></label>
     <label class="field"><span>說明</span><textarea class="textarea" data-x="detail" rows="3" placeholder="這個任務要做什麼、需要注意的地方">${esc(t.detail)}</textarea></label>`;
   }
   function editTask(anchor, bi, kid) {
@@ -15750,7 +15754,8 @@ ${lines.join("\n")}`;
     const read = () => {
       const v = (k) => ($(`[data-x=${k}]`, body)?.value || "").trim();
       const type = cat === "本科" ? subj : cat;
-      return { type, unit: cat === "本科" ? v("unit") : "", content: v("content"), detail: cat === "其他" ? v("detail") : "", status: b.tasks[kid]?.status || "" };
+      const oc = $("[data-x=opick]", body) ? (v("opick") === "__self__" ? v("oinput") : v("opick")) : v("content");
+      return { type, unit: cat === "本科" ? v("unit") : "", content: cat === "其他" ? oc : v("content"), detail: cat === "其他" ? v("detail") : "", status: b.tasks[kid]?.status || "" };
     };
     const focus = () => setTimeout(() => $("[data-x=content]", body)?.focus(), 30);
     body.addEventListener("click", (e) => {
@@ -15787,6 +15792,11 @@ ${lines.join("\n")}`;
       }
     });
     body.addEventListener("change", (e) => {
+      if (e.target.dataset.x === "opick") {
+        const self2 = e.target.value === "__self__";
+        $("[data-x=owrap]", body).hidden = !self2;
+        if (self2) $("[data-x=oinput]", body).focus();
+      }
       if (e.target.dataset.x === "content" && e.target.tagName === "SELECT") $("[data-x=fields]", body).innerHTML = taskFields("SEL", { ...read(), content: e.target.value }, bmin, prevU);
     });
     body.addEventListener("keydown", (e) => {
